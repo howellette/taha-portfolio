@@ -56,3 +56,4 @@ Visit: `https://your-site.vercel.app/admin/login`
 
 ## Seed Data
 Run `supabase/migrations/002_seed.sql` to add Taha's existing data automatically.
+"# rebuild" 
