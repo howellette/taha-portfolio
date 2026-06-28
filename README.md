@@ -86,4 +86,4 @@ git push -u origin main
  
 ---
  
-*Built with ❤️ using Next.js & Supabase*
+*Built with ❤️ using Next.js & Supabase*"test" 
