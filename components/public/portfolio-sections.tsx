@@ -3,7 +3,7 @@ import { ContactSection } from "./contact-section";
 
 type SectionWithEntries = Section & { entries: Entry[] };
 
-function str(v: unknown) { return typeof v === "string" ? v : String(v ?? ""); }
+function str(v: unknown): string { return typeof v === "string" ? v : String(v ?? ""); }
 function arr(v: unknown): string[] { return Array.isArray(v) ? v.map(String) : []; }
 
 function EduEntry({ data }: { data: Record<string, unknown> }) {
@@ -17,8 +17,8 @@ function EduEntry({ data }: { data: Record<string, unknown> }) {
         <div className="entry-title">{str(data.degree)}</div>
         <div className="entry-subtitle">{str(data.institution)}</div>
         <div className="entry-meta">{str(data.location)}{data.specialization ? ` · ${str(data.specialization)}` : ""}</div>
-        {data.description && <div className="entry-desc">{str(data.description)}</div>}
-        {data.current && <span className="tag tag-green" style={{marginTop:"0.5rem",display:"inline-block"}}>Currently Enrolled</span>}
+        {data.description ? <div className="entry-desc">{str(data.description)}</div> : null}
+        {data.current ? <span className="tag tag-green" style={{marginTop:"0.5rem",display:"inline-block"}}>Currently Enrolled</span> : null}
       </div>
     </div>
   );
@@ -30,12 +30,12 @@ function ExpEntry({ data }: { data: Record<string, unknown> }) {
       <div className="timeline-side">
         <div className="timeline-dot" />
         <div className="timeline-date">{str(data.duration)}</div>
-        {data.current && <div style={{marginTop:"0.4rem"}}><span className="tag tag-green">Current</span></div>}
+        {data.current ? <div style={{marginTop:"0.4rem"}}><span className="tag tag-green">Current</span></div> : null}
       </div>
       <div className="entry-body">
         <div className="entry-title">{str(data.position)}</div>
         <div className="entry-subtitle">{str(data.organization)}</div>
-        {data.supervisor && <div className="entry-meta">Supervisor: {str(data.supervisor)}</div>}
+        {data.supervisor ? <div className="entry-meta">Supervisor: {str(data.supervisor)}</div> : null}
         {arr(data.responsibilities).length > 0 && (
           <ul style={{marginTop:"0.5rem",display:"flex",flexDirection:"column",gap:"0.3rem"}}>
             {arr(data.responsibilities).map((r, i) => (
@@ -70,20 +70,19 @@ function PubEntry({ data }: { data: Record<string, unknown> }) {
         <div className="entry-title">{str(data.title)}</div>
         <div className="entry-subtitle">{str(data.venue)}</div>
         <div className="entry-meta">{arr(data.authors).join(", ")}</div>
-        {data.abstract && <div className="entry-desc" style={{marginTop:"0.4rem"}}>{str(data.abstract)}</div>}
+        {data.abstract ? <div className="entry-desc" style={{marginTop:"0.4rem"}}>{str(data.abstract)}</div> : null}
         <div className="entry-tags" style={{marginTop:"0.5rem"}}>
           {arr(data.tags).map((t) => <span key={t} className="tag">{t}</span>)}
         </div>
-        {data.paper_url && (
+        {data.paper_url ? (
           <div className="entry-links">
             <a href={str(data.paper_url)} target="_blank" rel="noopener" className="entry-link">View Paper ↗</a>
           </div>
-        )}
-        {data.doi && !data.paper_url && (
+        ) : data.doi ? (
           <div className="entry-links">
             <a href={`https://doi.org/${str(data.doi)}`} target="_blank" rel="noopener" className="entry-link">View Paper ↗</a>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -109,26 +108,28 @@ function ProjEntry({ data }: { data: Record<string, unknown> }) {
         {arr(data.technologies).map((t) => <span key={t} className="tech-chip">{t}</span>)}
       </div>
       <div style={{display:"flex",gap:"0.5rem",marginTop:"0.25rem",flexWrap:"wrap"}}>
-        {data.github && str(data.github) && <a href={str(data.github)} target="_blank" rel="noopener" className="entry-link">GitHub ↗</a>}
-        {data.demo && str(data.demo) && <a href={str(data.demo)} target="_blank" rel="noopener" className="entry-link">Demo ↗</a>}
-        {data.paper && str(data.paper) && <a href={str(data.paper)} target="_blank" rel="noopener" className="entry-link">Paper ↗</a>}
+        {data.github && str(data.github) ? <a href={str(data.github)} target="_blank" rel="noopener" className="entry-link">GitHub ↗</a> : null}
+        {data.demo && str(data.demo) ? <a href={str(data.demo)} target="_blank" rel="noopener" className="entry-link">Demo ↗</a> : null}
+        {data.paper && str(data.paper) ? <a href={str(data.paper)} target="_blank" rel="noopener" className="entry-link">Paper ↗</a> : null}
       </div>
       <div style={{fontSize:"0.72rem",color:"var(--muted2)",fontFamily:"var(--mono)",marginTop:"0.25rem"}}>{str(data.date)}</div>
     </div>
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function SkillsEntry({ entries }: { entries: Entry[] }) {
   const all = entries.map(e => e.data);
-  const programming = all.find(d => d.programming) as any;
-  if (!programming) return null;
-  const d = programming;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = all.find(dd => dd.programming) as any;
+  if (!d) return null;
   return (
     <div className="skills-grid">
       {d.programming && (
         <div className="skill-card">
           <div className="skill-card-title">Programming Languages</div>
           <div className="skill-bars">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {d.programming.map((s: any) => (
               <div key={s.name} className="skill-row">
                 <div className="skill-row-header">
@@ -145,6 +146,7 @@ function SkillsEntry({ entries }: { entries: Entry[] }) {
         <div className="skill-card">
           <div className="skill-card-title">Frameworks & Libraries</div>
           <div className="skill-bars">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {d.frameworks.map((s: any) => (
               <div key={s.name} className="skill-row">
                 <div className="skill-row-header">
@@ -166,6 +168,7 @@ function SkillsEntry({ entries }: { entries: Entry[] }) {
       {d.software_tools && (
         <div className="skill-card">
           <div className="skill-card-title">Software & Tools</div>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <div className="chip-cloud">{d.software_tools.map((t: any) => <span key={t.name} className="chip">{t.name}</span>)}</div>
         </div>
       )}
@@ -179,6 +182,7 @@ function SkillsEntry({ entries }: { entries: Entry[] }) {
         <div className="skill-card">
           <div className="skill-card-title">Languages</div>
           <div className="skill-bars">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {d.languages.map((l: any) => (
               <div key={l.name} className="skill-row">
                 <div className="skill-row-header">
@@ -201,7 +205,7 @@ function AchEntry({ data }: { data: Record<string, unknown> }) {
       <div className="timeline-side">
         <div className="timeline-dot" />
         <div className="timeline-date">{str(data.year)}</div>
-        {data.type && <div style={{marginTop:"0.3rem"}}><span className="tag">{str(data.type)}</span></div>}
+        {data.type ? <div style={{marginTop:"0.3rem"}}><span className="tag">{str(data.type)}</span></div> : null}
       </div>
       <div className="entry-body">
         <div style={{fontSize:"1.2rem",marginBottom:"0.3rem"}}>{str(data.icon)}</div>
@@ -221,17 +225,17 @@ function GenericEntry({ data }: { data: Record<string, unknown> }) {
       </div>
       <div className="entry-body">
         <div className="entry-title">{str(data.title ?? data.name ?? "")}</div>
-        {data.subtitle && <div className="entry-subtitle">{str(data.subtitle)}</div>}
-        {data.description && <div className="entry-desc">{str(data.description)}</div>}
-        {data.link && (
+        {data.subtitle ? <div className="entry-subtitle">{str(data.subtitle)}</div> : null}
+        {data.description ? <div className="entry-desc">{str(data.description)}</div> : null}
+        {data.link ? (
           <div className="entry-links"><a href={str(data.link)} target="_blank" rel="noopener" className="entry-link">Learn more ↗</a></div>
-        )}
+        ) : null}
       </div>
     </div>
   );
 }
 
-function renderSection(section: SectionWithEntries) {
+function renderSection(section: SectionWithEntries): React.ReactNode {
   const { type, entries } = section;
   if (type === "skills") return <SkillsEntry entries={entries} />;
   if (type === "project") return <div className="card-grid">{entries.map(e => <ProjEntry key={e.id} data={e.data} />)}</div>;
