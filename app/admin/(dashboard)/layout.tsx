@@ -4,17 +4,29 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [checked, setChecked] = useState(false);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    async function checkAuth() {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session && !window.location.pathname.includes("/admin/login")) {
+    const supabase = createClient();
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setAuthed(true);
+      } else {
         window.location.href = "/admin/login";
       }
       setChecked(true);
-    }
-    checkAuth();
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setAuthed(true);
+      } else {
+        window.location.href = "/admin/login";
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   async function logout() {
@@ -23,7 +35,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.location.href = "/admin/login";
   }
 
-  if (!checked) return <div style={{color:"var(--muted)",padding:"2rem"}}>Loading...</div>;
+  if (!checked) return <div style={{color:"var(--muted)",padding:"2rem",background:"var(--bg)",minHeight:"100vh"}}>Loading...</div>;
+  if (!authed) return null;
 
   return (
     <div className="admin-layout">
