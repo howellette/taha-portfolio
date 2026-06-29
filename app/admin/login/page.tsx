@@ -1,18 +1,27 @@
 "use client";
 import { useState } from "react";
-import { login } from "@/lib/actions/admin";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleLogin() {
     setLoading(true);
     setError("");
-    const formData = new FormData(e.currentTarget);
-    const result = await login(formData);
-    if (result?.error) { setError(result.error); setLoading(false); }
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else if (data.session) {
+      // Wait a moment for session to be stored
+      setTimeout(() => {
+        window.location.replace("/admin");
+      }, 500);
+    }
   }
 
   return (
@@ -20,20 +29,38 @@ export default function LoginPage() {
       <div className="admin-login-box">
         <div className="admin-login-title">Admin Login</div>
         <div className="admin-login-sub">Sign in to manage your portfolio</div>
-        <form onSubmit={handleSubmit} className="admin-login-form">
+        <div className="admin-login-form">
           {error && <div className="error-msg">{error}</div>}
           <div>
             <label className="admin-label">Email</label>
-            <input name="email" type="email" className="admin-input" placeholder="you@email.com" required />
+            <input
+              type="email"
+              className="admin-input"
+              placeholder="you@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <label className="admin-label">Password</label>
-            <input name="password" type="password" className="admin-input" placeholder="••••••••" required />
+            <input
+              type="password"
+              className="admin-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            />
           </div>
-          <button type="submit" className="btn-admin btn-save" style={{width:"100%",padding:"0.65rem"}} disabled={loading}>
+          <button
+            className="btn-admin btn-save"
+            style={{width:"100%", padding:"0.65rem"}}
+            onClick={handleLogin}
+            disabled={loading}
+          >
             {loading ? "Signing in..." : "Sign In"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
